@@ -77,16 +77,28 @@ def tags_view(tag_name):
     )
 
 
+@app.route("/tags/delete_<tag_name>")
+def tags_delete(tag_name):
+    db = models.db
+    tag = db.session.execute(
+        db.select(models.Tag).where(models.Tag.name == tag_name)
+    ).scalar()
+    notes = db.session.execute(
+        db.select(models.Note).where(models.Note.tags.any(id=tag.id))
+    ).scalars()
+    for i in notes:
+        db.session.delete(i)
+    db.session.delete(tag)
+    db.session.commit()
+    return flask.redirect(flask.url_for("index"))
+
+
 @app.route("/note/delete_<note_id>")
 def node_delete(note_id):
     db = models.db
-    # db.Query.filter_by(id=note_id).delete()
-    note = (
-        db.session.execute(db.select(models.Note).where(models.Note.id == note_id))
-        .scalars()
-        .first()
-    )
-    print(note)
+    note = db.session.execute(
+        db.select(models.Note).where(models.Note.id == note_id)
+    ).scalar()
     db.session.delete(note)
     db.session.commit()
     return flask.redirect(flask.url_for("index"))
