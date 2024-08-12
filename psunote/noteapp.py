@@ -77,19 +77,33 @@ def tags_view(tag_name):
     )
 
 
+@app.route("/note/delete_<note_id>")
+def node_delete(note_id):
+    db = models.db
+    # db.Query.filter_by(id=note_id).delete()
+    note = (
+        db.session.execute(db.select(models.Note).where(models.Note.id == note_id))
+        .scalars()
+        .first()
+    )
+    print(note)
+    db.session.delete(note)
+    db.session.commit()
+    return flask.redirect(flask.url_for("index"))
+
+
 @app.route("/notes/edit_<note_id>", methods=["GET", "POST"])
 def notes_edit(note_id):
+    # db = models.db
+    # tmp_note = db.session.execute(
+    #     db.select(models.Note).where(models.Note.id == note_id)
+    # ).scalars()
+
     form = forms.NoteForm()
 
-    db = models.db
-
-    notes = db.session.execute(
-        db.select(models.Note).where(models.Note.id == note_id)
-    ).scalars()
-    form.title.label = notes.title
     if not form.validate_on_submit():
         print("error", form.errors)
-        return flask.render_template("notes-edit.html", form=form, notes=notes)
+        return flask.render_template("notes-edit.html", form=form)
     note = models.Note()
     form.populate_obj(note)
     note.tags = []

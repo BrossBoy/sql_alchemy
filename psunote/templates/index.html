@@ -27,9 +27,9 @@
       <li class="nav-item" , style="margin: 10px 10px;">
         <a class="btn btn-primary" href="{{ url_for('notes_edit', note_id=note.id) }}">Edit</a>
       </li>
-      <!-- <li class="nav-item" , style="margin: 10px 10px;">
-        <a class="btn btn-primary" href="{{ url_for('notes_create') }}">Delete</a>
-      </li> -->
+      <li class="nav-item" , style="margin: 10px 10px;">
+        <a class="btn btn-primary" href="{{ url_for('node_delete', note_id=note.id) }}">Delete</a>
+      </li>
     </ul>
 
   </div>
