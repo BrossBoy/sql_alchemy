@@ -106,16 +106,13 @@ def node_delete(note_id):
 
 @app.route("/notes/edit_<note_id>", methods=["GET", "POST"])
 def notes_edit(note_id):
-    # db = models.db
-    # tmp_note = db.session.execute(
-    #     db.select(models.Note).where(models.Note.id == note_id)
-    # ).scalars()
-
     form = forms.NoteForm()
-
     if not form.validate_on_submit():
         print("error", form.errors)
-        return flask.render_template("notes-edit.html", form=form)
+        return flask.render_template(
+            "notes-edit.html",
+            form=form,
+        )
     note = models.Note()
     form.populate_obj(note)
     note.tags = []
@@ -134,7 +131,35 @@ def notes_edit(note_id):
 
         note.tags.append(tag)
 
-    db.session.add(note)
+    db.session.execute(
+        db.update(models.Note).values(title=note.title).where(models.Note.id == note_id)
+    )
+    db.session.execute(
+        db.update(models.Note)
+        .values(description=note.description)
+        .where(models.Note.id == note_id)
+    )
+    db.session.commit()
+
+    return flask.redirect(flask.url_for("index"))
+
+
+@app.route("/tag/edit_<tag_name>", methods=["GET", "POST"])
+def tag_edit(tag_name):
+    form = forms.TagForm()
+    if not form.validate_on_submit():
+        print("error", form.errors)
+        return flask.render_template(
+            "tag_edit.html",
+            form=form,
+        )
+
+    db = models.db
+    tag = models.Tag()
+    form.populate_obj(tag)
+    db.session.execute(
+        db.update(models.Tag).values(name=tag.name).where(models.Tag.name == tag_name)
+    )
     db.session.commit()
 
     return flask.redirect(flask.url_for("index"))
